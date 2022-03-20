@@ -1,0 +1,82 @@
+stages:
+  - build prod
+  - build stage
+  - deploy to qa
+  - deploy to staging
+  - deploy to production
+
+build_prod:
+  stage: build prod
+  image: node:16
+  script:
+    - mkdir -p ~/.ssh ; echo "$GIT_SSH_KEY" > ~/.ssh/id_rsa ; chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan git.sports.ru >> ~/.ssh/known_hosts
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/dist
+    expire_in: 1 month
+  only:
+    - master
+
+build_stage:
+  stage: build stage
+  image: node:16
+  script:
+    - mkdir -p ~/.ssh ; echo "$GIT_SSH_KEY" > ~/.ssh/id_rsa ; chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan git.sports.ru >> ~/.ssh/known_hosts
+    - npm ci
+    - TARGET_ENV=staging npm run build
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/dist
+    expire_in: 1 month
+  only:
+    - dev
+
+stage:
+  stage: deploy to staging
+  image: sportsru/ansible-alpine:2.9.16
+  before_script:
+  script:
+    - entrypoint ansible-playbook -i .ci/inventory -l stage .ci/deploy.yml -u mgmt_static
+  dependencies:
+    - build_stage
+  only:
+    - dev
+
+qa:
+  stage: deploy to qa
+  image: sportsru/ansible-alpine:2.9.16
+  before_script:
+  script:
+    - entrypoint ansible-playbook -i .ci/inventory -l qa .ci/deploy.yml -u mgmt_static
+  dependencies:
+    - build_stage
+  only:
+    - dev
+
+production:
+  stage: deploy to production
+  image: sportsru/ansible-alpine:2.9.16
+  before_script:
+  script:
+    - entrypoint ansible-playbook -i .ci/inventory -l prod .ci/deploy.yml -u mgmt_static
+  dependencies:
+    - build_prod
+  only:
+    - master
+
+prod old:
+  stage: deploy to production
+  image: $CI_REGISTRY/devops/sprt-ansible:latest
+  script:
+    - cd /srv/sprt-ansible
+    - ansible-playbook -u dude playbooks/static/deploy_ci.yml
+      -i inventory2/production
+      -e deploy_env=gitlab
+      -e main_static_repo_dir=$CI_PROJECT_DIR/dist/
+      -e main_static_base_dir=/srv/sports/special/$CI_PROJECT_NAME
+  only:
+    - master

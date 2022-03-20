@@ -1,0 +1,51 @@
+html, body {
+  margin 0
+  font-size 62.5%
+  height 100%
+  +layout-big() {
+    font-size 94%
+  }
+
+  @media (min-width 2400px) {
+    font-size 120%
+  }
+}
+
+#app {
+  height 100%
+}
+
+#pattern-form {
+  -moz-osx-font-smoothing grayscale
+  -webkit-font-smoothing antialiased
+  -ms-text-size-adjust 100%
+  -webkit-text-size-adjust 100%
+  overflow-x hidden
+  margin 0
+  box-sizing border-box
+  font-family $font-default
+  color black
+  font-size 1.8rem
+  height: 100%
+
+  a {
+    color black
+    text-decoration none
+  }
+
+  a.link {
+    color black
+    text-underline-offset 4px
+    text-decoration underline
+    text-decoration-style dashed
+    text-decoration-color rgba(white, .3)
+
+    &:hover {
+      text-decoration-color black !important
+    }
+  }
+
+  *, *:before, *:after {
+    box-sizing inherit
+  }
+}

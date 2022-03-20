@@ -1,0 +1,33 @@
+
+/* Responsive breakpoints */
+
+
+layout-tablet() {
+    @media (max-width: $breakpoint-tablet) {
+        {block}
+    }
+}
+
+layout-mobile() {
+    @media (max-width: $breakpoint-mobile) {
+        {block}
+    }
+}
+
+layout-mobile-small() {
+    @media (max-width: $breakpoint-mobile-small) {
+        {block}
+    }
+}
+
+layout-big() {
+  @media (min-width: $breakpoint-big) {
+      {block}
+  }
+}
+
+retina() {
+    @media (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi) {
+        {block}
+    }
+}
